@@ -28,16 +28,6 @@ namespace Domain
             Saldo -= monto;
         }
 
-        // Metodo para actualizar cuenta luego de una transferencia
-        public void ActualizarCuenta(Cuenta cuentaOrigen, Cuenta cuentaDestino)
-        {
-            // Actualizar la cuenta origen
-            cuentaOrigen.Retirar(cuentaOrigen.Saldo);
-            // Actualizar la cuenta destino
-            cuentaDestino.Depositar(cuentaDestino.Saldo);
-
-        }
-
 
         //public abstract void Accept(ICuentaVisitor visitor);
         //public abstract void AcceptOrigen(ITransferenciaVisitor visitor);

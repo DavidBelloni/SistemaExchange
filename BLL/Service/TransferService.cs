@@ -3,6 +3,7 @@ using Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -26,7 +27,7 @@ namespace BLL.Service
             }
 
             // Retirar saldo primero para evitar problemas
-             cuentaOrigen.Retirar(monto);
+            cuentaOrigen.Retirar(monto);
 
             //Lógica para depositar o convertir.
             if (cuentaOrigen is CajaAhorro && cuentaDestino is CajaAhorro)
@@ -58,14 +59,12 @@ namespace BLL.Service
 
 
 
+            //Registrar Operacion "Movimiento"
 
-            //TODO eso debería ser una Transacción
-            //Begin Transaction
-            //1) Actualizar cuentaOrigen
-            //2) ACtualizar cuentaDestino
-
-            //Generar el objeto Operacion
             Operacion operacion = new Operacion(cuentaOrigen, cuentaDestino, DateTime.Now, monto, TipoOperacion.TransferenciaATerceros);
+
+        }
+
 
             //3) Guardar operacion
             //commit
@@ -89,7 +88,7 @@ namespace BLL.Service
             // Hay que crear la operación si todo salió bien...
 
 
-        }
+
 
         // Clase visitante que trabaja con la cuenta origen, y luego hace doble despacho a cuenta destino
         //private class VisitanteTransferencia : ITransferenciaVisitor, ICuentaVisitor
@@ -170,6 +169,18 @@ namespace BLL.Service
                 const decimal tasaBtcAPesos = 119928832; // tasa fija ejemplo
                 return montoBtc * tasaBtcAPesos;
             }
-        
-    }  
+
+            public void RegistrarOperacion()
+            {
+            var operacion = new Operacion
+                {
+                    CuentaOrigen = cuentaOrigen,
+                    CuentaDestino = CuentaDestino,
+                    Fecha = DateTime.Now,
+                    Monto = Monto,
+                    TipoOperacion = TipoOperacion.TransferenciaATerceros
+                };
+            }
+
+    }
 }
