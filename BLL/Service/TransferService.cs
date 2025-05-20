@@ -59,7 +59,7 @@ namespace BLL.Service
 
 
 
-            //Registrar Operacion "Movimiento"
+            //Mostrar por pantalla el movimiento generado
 
             Operacion operacion = new Operacion(cuentaOrigen, cuentaDestino, DateTime.Now, monto, TipoOperacion.TransferenciaATerceros);
 
