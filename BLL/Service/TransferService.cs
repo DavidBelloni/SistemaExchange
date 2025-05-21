@@ -5,12 +5,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BLL.Service
 {
-    public class TransferService 
+    public class TransferService : ITransferService
     {
+        // Lista estática para almacenar todas las operaciones
+        public static List<Operacion> Operaciones = new List<Operacion>();
         public void Transferir(Cuenta cuentaOrigen, Cuenta cuentaDestino, decimal monto)
         {
             if (cuentaOrigen == null) throw new ArgumentNullException(nameof(cuentaOrigen));
@@ -56,36 +59,36 @@ namespace BLL.Service
             {
                 throw new InvalidOperationException("Tipo de transferencia no soportado.");
             }
-
-
-
-            //Mostrar por pantalla el movimiento generado
-
-            Operacion operacion = new Operacion(cuentaOrigen, cuentaDestino, DateTime.Now, monto, TipoOperacion.TransferenciaATerceros);
-
         }
 
 
-            //3) Guardar operacion
-            //commit
+        public void Operacion(Cuenta cuentaOrigen, Cuenta cuentaDestino, decimal monto, TipoOperacion tipoOperacion)
+        {
+            if (cuentaOrigen == null) throw new ArgumentNullException(nameof(cuentaOrigen));
+            if (cuentaDestino == null) throw new ArgumentNullException(nameof(cuentaDestino));
+            if (monto <= 0) throw new ArgumentException("El monto debe ser mayor a cero.", nameof(monto));
+
+            // Crear la operación
+            Operacion operacion = new Operacion(cuentaOrigen, cuentaDestino, DateTime.Now, monto, tipoOperacion);
+
+            // Guardar la operación en la lista estática
+            Operaciones.Add(operacion);
+        }
 
 
+        //// Creamos el visitante para la cuenta origen con toda la info necesaria
+        //var visitanteTransferencia = new VisitanteTransferencia()
+        //{
+        //    CuentaDestino = cuentaDestino,
+        //    Monto = monto,
+        //    ClienteOrigen = cuentaOrigen.Cliente
+        //};
+
+        //// Iniciamos doble despacho: cuenta origen acepta este visitante
+        //cuentaOrigen.AcceptOrigen(visitanteTransferencia);
 
 
-
-            //// Creamos el visitante para la cuenta origen con toda la info necesaria
-            //var visitanteTransferencia = new VisitanteTransferencia()
-            //{
-            //    CuentaDestino = cuentaDestino,
-            //    Monto = monto,
-            //    ClienteOrigen = cuentaOrigen.Cliente
-            //};
-
-            //// Iniciamos doble despacho: cuenta origen acepta este visitante
-            //cuentaOrigen.AcceptOrigen(visitanteTransferencia);
-
-
-            // Hay que crear la operación si todo salió bien...
+        // Hay que crear la operación si todo salió bien...
 
 
 
@@ -97,8 +100,8 @@ namespace BLL.Service
         //    public decimal Monto { get; set; }
         //    public Cliente ClienteOrigen { get; set; }
 
-            // Estos campos se usan temporalmente para tipo de cuenta origen
-            private Cuenta cuentaOrigen;
+        // Estos campos se usan temporalmente para tipo de cuenta origen
+        private Cuenta cuentaOrigen;
 
             // Primera llamada - cuando cuenta origen acepta este visitante
             //public void VisitDesdeCajaDeAhorro(CajaAhorro cuentaOrigen)
@@ -158,28 +161,16 @@ namespace BLL.Service
             //    }
             //}
 
-            private decimal ConvertirPesosABTC(decimal montoPesos)
+            public decimal ConvertirPesosABTC(decimal montoPesos)
             {
                 const decimal tasaPesosABtc = 0.000000008338m; // tasa fija ejemplo
                 return montoPesos * tasaPesosABtc;
             }
 
-            private decimal ConvertirBTCAPesos(decimal montoBtc)
+            public decimal ConvertirBTCAPesos(decimal montoBtc)
             {
                 const decimal tasaBtcAPesos = 119928832; // tasa fija ejemplo
                 return montoBtc * tasaBtcAPesos;
-            }
-
-            public void RegistrarOperacion()
-            {
-            var operacion = new Operacion
-                {
-                    CuentaOrigen = cuentaOrigen,
-                    CuentaDestino = CuentaDestino,
-                    Fecha = DateTime.Now,
-                    Monto = Monto,
-                    TipoOperacion = TipoOperacion.TransferenciaATerceros
-                };
             }
 
     }

@@ -45,7 +45,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Factory\" />
-    <Folder Include="Implementation\Memory\SqlServer\" />
+    <Folder Include="Implementation\Memory\" />
+    <Folder Include="Implementation\SqlServer\" />
     <Folder Include="Interface\" />
   </ItemGroup>
   <ItemGroup>
