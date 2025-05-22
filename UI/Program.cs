@@ -23,40 +23,79 @@ namespace UI
             MonederoBTC mon = new MonederoBTC("YYYY-YYYY");
             cliente.AgregarCuenta(mon);
 
+            // TRANSFERENCIA DE CA A BTC
+            // (ANTES)
             Console.WriteLine("Antes de convertir de $ a BTC");
             Console.WriteLine($"Caja Ahorro $: {cajaAhorro.Saldo}");
             Console.WriteLine($"Monedero BTC: {mon.Saldo} \n");
 
+            // PROCESO + REGISTRO DE OPERACION
             service.Transferir(cajaAhorro, mon, 10000);
             service.Operacion(cajaAhorro, mon, 10000, TipoOperacion.Conversion);
 
+            // (DESPUES)
             Console.WriteLine("Luego de hacer la conversion");
             Console.WriteLine($"Caja Ahorro $: {cajaAhorro.Saldo}");
             Console.WriteLine($"Monedero BTC: {mon.Saldo} \n");
 
+            // TRANSFERENCIA DE BTA A CA
+
+            // PROCESO + REGISTRO DE OPERACION
             service.Transferir(mon, cajaAhorro, (decimal)0.00008338);
             service.Operacion(mon, cajaAhorro, (decimal)0.00008338, TipoOperacion.Conversion);
 
+            // (DESPUES)
             Console.WriteLine("Luego de hacer la conversión a saldo inicial");
             Console.WriteLine($"Caja Ahorro $: {cajaAhorro.Saldo}");
             Console.WriteLine($"Monedero BTC: {mon.Saldo} \n");
 
+            // CREACION DE CLIENTE Y CUENTA
             Cliente cliente2 = new Cliente("20392120187", "María");
             CajaAhorro cajaAhorro2 = new CajaAhorro("2222222222222222222222");
             cliente2.AgregarCuenta(cajaAhorro2);
 
+            // TRANSFERENCIA DE CA A CA
+            // ANTES
             Console.WriteLine("Antes de transferir de $ a $");
             Console.WriteLine($"Caja Ahorro 1 $: {cajaAhorro.Saldo}");
             Console.WriteLine($"Caja Ahorro 2 $: {cajaAhorro2.Saldo} \n");
 
+            // PROCESO + REGISTRO DE OPERACION
             service.Transferir(cajaAhorro, cajaAhorro2, 50000);
             service.Operacion(cajaAhorro, cajaAhorro2, 50000, TipoOperacion.TransferenciaATerceros);
 
+            // DESPUES
             Console.WriteLine("Después de transferir de $ a $");
             Console.WriteLine($"Caja Ahorro 1 $: {cajaAhorro.Saldo}");
             Console.WriteLine($"Caja Ahorro 2 $: {cajaAhorro2.Saldo} \n");
 
-            // Imprimir por pantalla la lista de operaciones
+
+            // CREACION DE CLIENTE Y CUENTA
+            Cliente cliente3 = new Cliente("402003007", "Lucas");
+            MonederoBTC mon3 = new MonederoBTC("ZZZZ-ZZZZ");
+            MonederoBTC mon4 = new MonederoBTC("RRRR-RRRR");
+            mon3.Depositar((decimal)0.00010000);
+            mon4.Depositar((decimal)0.00000001);
+            cliente3.AgregarCuenta(mon3);
+            cliente3.AgregarCuenta(mon4);
+
+            // TRANSFERENCIA DE BTC A BTC
+            // (ANTES)
+            Console.WriteLine("Antes de transferir de BTC a BTC");
+            Console.WriteLine($"Monedero BTC 1: {mon3.Saldo}");
+            Console.WriteLine($"Monedero BTC 2: {mon4.Saldo} \n");
+
+            // PROCESO + REGISTRO DE OPERACION
+            service.Transferir(mon3, mon4, (decimal)0.00010000);
+            service.Operacion(mon3, mon4, (decimal)0.00010000, TipoOperacion.TransferenciaATerceros);
+
+            // (DESPUES)
+            Console.WriteLine("Despues de transferir BTC a BTC");
+            Console.WriteLine($"Monedero BTC 1: {mon3.Saldo}");
+            Console.WriteLine($"Monedero BTC 2: {mon4.Saldo} \n");
+
+
+            // MOSTRAR POR PANTALLA TODOS LOS MOVIMIENTOS
             Console.WriteLine("Resumen de movimientos de cuentas: \n");
             foreach (var op in TransferService.Operaciones)
             {
