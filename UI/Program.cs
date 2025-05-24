@@ -102,6 +102,8 @@ namespace UI
                 Console.WriteLine($"Cliente: {cuenta.Cliente.Nombre}, Tipo de Cuenta: {cuenta.GetType().Name}, Saldo: {cuenta.Saldo}");
             }
 
+            Console.WriteLine(" ");
+
             // IMPRIMIR LISTA DE OPERACIONES
             Console.WriteLine("Lista de Operaciones");
             foreach (var operacion in service.ObtenerOperaciones())

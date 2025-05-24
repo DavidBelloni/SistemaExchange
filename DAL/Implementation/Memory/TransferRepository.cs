@@ -31,7 +31,13 @@ namespace DAL.Implementation.Memory
 
         public void AgregarCuenta(Cuenta cuenta)
         {
-            if (!cuentas.Contains(cuenta))
+            bool existe = cuentas.Any(c =>
+                c.Cliente.CUIT == cuenta.Cliente.CUIT &&
+                c.GetType() == cuenta.GetType() &&
+                IdentificadorCuenta(c) == IdentificadorCuenta(cuenta)
+            );
+
+            if (!existe)
                 cuentas.Add(cuenta);
             else
                 throw new Exception("La cuenta ya existe");
@@ -81,8 +87,8 @@ namespace DAL.Implementation.Memory
         {
             if (cuenta is CajaAhorro ca)
                 return ca.CBU;
-            if (cuenta is MonederoBTC mbtc)
-                return mbtc.Direccion;
+            if (cuenta is MonederoBTC btc)
+                return btc.Direccion;
 
             // Agrega otros tipos si es necesario
             return null;
