@@ -25,6 +25,14 @@ namespace Domain
             TipoOperacion = tipoOperacion;
         }
 
+        public override string ToString()
+        {
+            string data = $"Fecha: {Fecha}" + $" Operación: {TipoOperacion} " + $"Monto: {Monto}\n";
+            data += $"Cliente Origen: {CuentaOrigen.Cliente.CUIT}\n";
+            data += $"Cliente Destino: {CuentaDestino.Cliente.CUIT}\n";
+            return data;
+        }
+
         // Método para mostrar la información de la operación
         public void MostrarInformacion()
         {

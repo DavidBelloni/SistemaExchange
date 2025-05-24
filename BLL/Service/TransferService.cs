@@ -3,6 +3,7 @@ using Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
@@ -14,6 +15,8 @@ namespace BLL.Service
     {
         // Lista estática para almacenar todas las operaciones
         public static List<Operacion> Operaciones = new List<Operacion>();
+
+
         public void Transferir(Cuenta cuentaOrigen, Cuenta cuentaDestino, decimal monto)
         {
             if (cuentaOrigen == null) throw new ArgumentNullException(nameof(cuentaOrigen));
@@ -29,149 +32,56 @@ namespace BLL.Service
                 throw new InvalidOperationException("Conversiones sólo permitidas entre cuentas del mismo titular.");
             }
 
+
             // Retirar saldo primero para evitar problemas
             cuentaOrigen.Retirar(monto);
 
-            //Lógica para depositar o convertir.
-            if (cuentaOrigen is CajaAhorro && cuentaDestino is CajaAhorro)
-            {
-                // Mismo tipo pesos a pesos
-                cuentaDestino.Depositar(monto);
-            }
-            else if (cuentaOrigen is MonederoBTC && cuentaDestino is MonederoBTC)
-            {
-                // BTC a BTC
-                cuentaDestino.Depositar(monto);
-            }
-            else if (cuentaOrigen is CajaAhorro && cuentaDestino is MonederoBTC)
-            {
-                // Pesos a BTC
-                decimal montoConvertido = ConvertirPesosABTC(monto);
-                cuentaDestino.Depositar(montoConvertido);
-            }
-            else if (cuentaOrigen is MonederoBTC && cuentaDestino is CajaAhorro)
-            {
-                // BTC a pesos
-                decimal montoConvertido = ConvertirBTCAPesos(monto);
-                cuentaDestino.Depositar(montoConvertido);
-            }
-            else
-            {
-                throw new InvalidOperationException("Tipo de transferencia no soportado.");
-            }
+
+            var operacion = ProcesarTransferencia((dynamic)cuentaOrigen, (dynamic)cuentaDestino, monto);
+
+            // Imprimimos la operacion gracias el metodo ToString() de la clase Operacion
+            Console.WriteLine(operacion);
         }
 
-
-        public void Operacion(Cuenta cuentaOrigen, Cuenta cuentaDestino, decimal monto, TipoOperacion tipoOperacion)
+        public Operacion ProcesarTransferencia(CajaAhorro cuentaOrigen, CajaAhorro cuentaDestino, decimal monto)
         {
-            if (cuentaOrigen == null) throw new ArgumentNullException(nameof(cuentaOrigen));
-            if (cuentaDestino == null) throw new ArgumentNullException(nameof(cuentaDestino));
-            if (monto <= 0) throw new ArgumentException("El monto debe ser mayor a cero.", nameof(monto));
-
-            // Crear la operación
-            Operacion operacion = new Operacion(cuentaOrigen, cuentaDestino, DateTime.Now, monto, tipoOperacion);
-
-            // Guardar la operación en la lista estática
-            Operaciones.Add(operacion);
+            cuentaDestino.Depositar(monto);
+            return new Operacion(cuentaOrigen, cuentaDestino, DateTime.Now, monto, TipoOperacion.TransferenciaATerceros);
+        }
+        public Operacion ProcesarTransferencia(MonederoBTC cuentaOrigen, MonederoBTC cuentaDestino, decimal monto)
+        {
+            cuentaDestino.Depositar(monto);
+            return new Operacion(cuentaOrigen, cuentaDestino, DateTime.Now, monto, TipoOperacion.TransferenciaATerceros);
+        }
+        public Operacion ProcesarTransferencia(CajaAhorro cuentaOrigen, MonederoBTC cuentaDestino, decimal monto)
+        {
+            decimal montoConvertido = ConvertirPesosABTC(monto);
+            cuentaDestino.Depositar(montoConvertido);
+            return new Operacion(cuentaOrigen, cuentaDestino, DateTime.Now, montoConvertido, TipoOperacion.Conversion);
+        }
+        public Operacion ProcesarTransferencia(MonederoBTC cuentaOrigen, CajaAhorro cuentaDestino, decimal monto)
+        {
+            decimal montoConvertido = ConvertirBTCAPesos(monto);
+            cuentaDestino.Depositar(montoConvertido);
+            return new Operacion(cuentaOrigen, cuentaDestino, DateTime.Now, montoConvertido, TipoOperacion.Conversion);
         }
 
+        public Operacion ProcesarTransferencia(Cuenta cuentaOrigen, Cuenta cuentaDestino, decimal monto)
+        {
+            throw new NotImplementedException($"No se soporta transferencia de {cuentaOrigen.GetType().Name} a {cuentaDestino.GetType().Name}");
+        }
 
-        //// Creamos el visitante para la cuenta origen con toda la info necesaria
-        //var visitanteTransferencia = new VisitanteTransferencia()
-        //{
-        //    CuentaDestino = cuentaDestino,
-        //    Monto = monto,
-        //    ClienteOrigen = cuentaOrigen.Cliente
-        //};
+        public decimal ConvertirPesosABTC(decimal montoPesos)
+        {
+            const decimal tasaPesosABtc = 0.000000008338m; // tasa fija ejemplo
+            return montoPesos * tasaPesosABtc;
+        }
 
-        //// Iniciamos doble despacho: cuenta origen acepta este visitante
-        //cuentaOrigen.AcceptOrigen(visitanteTransferencia);
-
-
-        // Hay que crear la operación si todo salió bien...
-
-
-
-
-        // Clase visitante que trabaja con la cuenta origen, y luego hace doble despacho a cuenta destino
-        //private class VisitanteTransferencia : ITransferenciaVisitor, ICuentaVisitor
-        //{
-        //    public Cuenta CuentaDestino { get; set; }
-        //    public decimal Monto { get; set; }
-        //    public Cliente ClienteOrigen { get; set; }
-
-        // Estos campos se usan temporalmente para tipo de cuenta origen
-        private Cuenta cuentaOrigen;
-
-            // Primera llamada - cuando cuenta origen acepta este visitante
-            //public void VisitDesdeCajaDeAhorro(CajaAhorro cuentaOrigen)
-            //{
-            //    this.cuentaOrigen = cuentaOrigen;
-            //    // Doble dispatch: cuentaDestino acepta este mismo visitante para depositar según origen
-            //    CuentaDestino.Accept(this);
-            //}
-
-            //public void VisitDesdeMonederoBTC(MonederoBTC cuentaOrigen)
-            //{
-            //    this.cuentaOrigen = cuentaOrigen;
-            //    CuentaDestino.Accept(this);
-            //}
-
-            // Segunda llamada - cuenta destino acepta el visitante
-
-            // Caso cuenta destino es CajaDeAhorro
-            //public void VisitCajaDeAhorro(CajaAhorro cuentaDestino)
-            //{
-            //    // Logica de conversion segun cuentaOrigen y cuentaDestino
-
-            //    if (cuentaOrigen is CajaAhorro)
-            //    {
-            //        // Mismo tipo pesos a pesos
-            //        cuentaDestino.Depositar(Monto);
-            //    }
-            //    else if (cuentaOrigen is MonederoBTC)
-            //    {
-            //        // BTC a pesos
-            //        decimal montoConvertido = ConvertirBTCAPesos(Monto);
-            //        cuentaDestino.Depositar(montoConvertido);
-            //    }
-            //    else
-            //    {
-            //        throw new InvalidOperationException("Tipo de cuenta origen no soportado en destino CajaDeAhorro.");
-            //    }
-            //}
-
-            // Caso cuenta destino es MonederoBTC
-            //public void VisitMonederoBTC(MonederoBTC cuentaDestino)
-            //{
-            //    if (cuentaOrigen is CajaAhorro)
-            //    {
-            //        // pesos a BTC
-            //        decimal montoConvertido = ConvertirPesosABTC(Monto);
-            //        cuentaDestino.Depositar(montoConvertido);
-            //    }
-            //    else if (cuentaOrigen is MonederoBTC)
-            //    {
-            //        // BTC a BTC
-            //        cuentaDestino.Depositar(Monto);
-            //    }
-            //    else
-            //    {
-            //        throw new InvalidOperationException("Tipo de cuenta origen no soportado en destino MonederoBTC.");
-            //    }
-            //}
-
-            public decimal ConvertirPesosABTC(decimal montoPesos)
-            {
-                const decimal tasaPesosABtc = 0.000000008338m; // tasa fija ejemplo
-                return montoPesos * tasaPesosABtc;
-            }
-
-            public decimal ConvertirBTCAPesos(decimal montoBtc)
-            {
-                const decimal tasaBtcAPesos = 119928832; // tasa fija ejemplo
-                return montoBtc * tasaBtcAPesos;
-            }
+        public decimal ConvertirBTCAPesos(decimal montoBtc)
+        {
+            const decimal tasaBtcAPesos = 119928832; // tasa fija ejemplo
+            return montoBtc * tasaBtcAPesos;
+        }
 
     }
 }

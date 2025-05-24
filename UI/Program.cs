@@ -31,7 +31,6 @@ namespace UI
 
             // PROCESO + REGISTRO DE OPERACION
             service.Transferir(cajaAhorro, mon, 10000);
-            service.Operacion(cajaAhorro, mon, 10000, TipoOperacion.Conversion);
 
             // (DESPUES)
             Console.WriteLine("Luego de hacer la conversion");
@@ -42,7 +41,6 @@ namespace UI
 
             // PROCESO + REGISTRO DE OPERACION
             service.Transferir(mon, cajaAhorro, (decimal)0.00008338);
-            service.Operacion(mon, cajaAhorro, (decimal)0.00008338, TipoOperacion.Conversion);
 
             // (DESPUES)
             Console.WriteLine("Luego de hacer la conversión a saldo inicial");
@@ -62,7 +60,6 @@ namespace UI
 
             // PROCESO + REGISTRO DE OPERACION
             service.Transferir(cajaAhorro, cajaAhorro2, 50000);
-            service.Operacion(cajaAhorro, cajaAhorro2, 50000, TipoOperacion.TransferenciaATerceros);
 
             // DESPUES
             Console.WriteLine("Después de transferir de $ a $");
@@ -74,8 +71,8 @@ namespace UI
             Cliente cliente3 = new Cliente("402003007", "Lucas");
             MonederoBTC mon3 = new MonederoBTC("ZZZZ-ZZZZ");
             MonederoBTC mon4 = new MonederoBTC("RRRR-RRRR");
-            mon3.Depositar((decimal)0.00010000);
-            mon4.Depositar((decimal)0.00000001);
+            mon3.Depositar(1);
+            mon4.Depositar(0);
             cliente3.AgregarCuenta(mon3);
             cliente3.AgregarCuenta(mon4);
 
@@ -86,22 +83,12 @@ namespace UI
             Console.WriteLine($"Monedero BTC 2: {mon4.Saldo} \n");
 
             // PROCESO + REGISTRO DE OPERACION
-            service.Transferir(mon3, mon4, (decimal)0.00010000);
-            service.Operacion(mon3, mon4, (decimal)0.00010000, TipoOperacion.TransferenciaATerceros);
+            service.Transferir(mon3, mon4, (decimal)0.5);
 
             // (DESPUES)
             Console.WriteLine("Despues de transferir BTC a BTC");
             Console.WriteLine($"Monedero BTC 1: {mon3.Saldo}");
             Console.WriteLine($"Monedero BTC 2: {mon4.Saldo} \n");
-
-
-            // MOSTRAR POR PANTALLA TODOS LOS MOVIMIENTOS
-            Console.WriteLine("Resumen de movimientos de cuentas: \n");
-            foreach (var op in TransferService.Operaciones)
-            {
-                op.MostrarInformacion();
-                Console.WriteLine();
-            }
 
         }
     }
