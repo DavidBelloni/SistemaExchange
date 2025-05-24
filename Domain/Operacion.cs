@@ -32,15 +32,5 @@ namespace Domain
             data += $"Cliente Destino: {CuentaDestino.Cliente.CUIT}\n";
             return data;
         }
-
-        // Método para mostrar la información de la operación
-        public void MostrarInformacion()
-        {
-            Console.WriteLine($"Operación: {TipoOperacion}");
-            Console.WriteLine($"Cliente Origen: {CuentaOrigen.Cliente.CUIT}");
-            Console.WriteLine($"Cliente Destino: {CuentaDestino.Cliente.CUIT}");
-            Console.WriteLine($"Fecha: {Fecha}");
-            Console.WriteLine($"Monto: {Monto}");
-        }
     }
 }
