@@ -42,7 +42,7 @@ namespace DAL.Implementation.Memory
             else
                 throw new Exception("La cuenta ya existe");
         }
-
+        
         public void Insertar(Operacion operacion)
         {
             if (operacion == null) throw new ArgumentNullException(nameof(operacion));
@@ -83,6 +83,11 @@ namespace DAL.Implementation.Memory
             }
         }
 
+        /// <summary>
+        /// Obtiene el identificador de la cuenta según su tipo.
+        /// </summary>
+        /// <param name="cuenta"></param>
+        /// <returns></returns>
         public string IdentificadorCuenta(Cuenta cuenta)
         {
             if (cuenta is CajaAhorro ca)
