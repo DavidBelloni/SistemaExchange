@@ -12,7 +12,7 @@ namespace UI
     {
         static void Main(string[] args)
         {
-            Operacion operacion = null;
+            
             TransferService service = new TransferService();
 
             Cliente cliente = new Cliente("20354746418", "David");
