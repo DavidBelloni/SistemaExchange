@@ -1,4 +1,7 @@
 ﻿using BLL.Interface;
+using DAL.Factory;
+using DAL.Implementation.Memory;
+using DAL.Interface;
 using Domain;
 using System;
 using System.Collections.Generic;
@@ -13,9 +16,19 @@ namespace BLL.Service
 {
     public class TransferService : ITransferService
     {
-        // Lista estática para almacenar todas las operaciones
-        public static List<Operacion> Operaciones = new List<Operacion>();
+        
+        private readonly ITransferRepository transferRepository; 
 
+        public TransferService()
+        {
+            transferRepository = FactoryRepository.TransferRepository;
+        }
+
+        public void RegistrarCuenta(Cuenta cuenta)
+        {
+            if (cuenta == null) throw new ArgumentNullException(nameof(cuenta));
+            transferRepository.AgregarCuenta(cuenta);
+        }
 
         public void Transferir(Cuenta cuentaOrigen, Cuenta cuentaDestino, decimal monto)
         {
@@ -32,15 +45,27 @@ namespace BLL.Service
                 throw new InvalidOperationException("Conversiones sólo permitidas entre cuentas del mismo titular.");
             }
 
-
             // Retirar saldo primero para evitar problemas
             cuentaOrigen.Retirar(monto);
 
-
+            // Procesar la transferencia
             var operacion = ProcesarTransferencia((dynamic)cuentaOrigen, (dynamic)cuentaDestino, monto);
 
             // Imprimimos la operacion gracias el metodo ToString() de la clase Operacion
             Console.WriteLine(operacion);
+
+            //Ir al repositorio
+            //1) Actualizar la cuenta origen
+            //2) Actualizar la cuenta destino
+            //3) Insertar la operacion
+            //commit tran
+            // Guardar operación, persistencia, etc.
+
+            transferRepository.ActualizarOrigen(cuentaOrigen);
+            transferRepository.ActualizarDestino(cuentaDestino);
+            transferRepository.Insertar(operacion);
+
+
         }
 
         public Operacion ProcesarTransferencia(CajaAhorro cuentaOrigen, CajaAhorro cuentaDestino, decimal monto)
@@ -65,7 +90,6 @@ namespace BLL.Service
             cuentaDestino.Depositar(montoConvertido);
             return new Operacion(cuentaOrigen, cuentaDestino, DateTime.Now, montoConvertido, TipoOperacion.Conversion);
         }
-
         public Operacion ProcesarTransferencia(Cuenta cuentaOrigen, Cuenta cuentaDestino, decimal monto)
         {
             throw new NotImplementedException($"No se soporta transferencia de {cuentaOrigen.GetType().Name} a {cuentaDestino.GetType().Name}");
@@ -83,5 +107,14 @@ namespace BLL.Service
             return montoBtc * tasaBtcAPesos;
         }
 
+        public IEnumerable<Cuenta> ObtenerCuentas()
+        {
+            return transferRepository.ObtenerCuentas();
+        }
+
+        public IEnumerable<Operacion> ObtenerOperaciones()
+        {
+            return transferRepository.ObtenerOperaciones();
+        }
     }
 }

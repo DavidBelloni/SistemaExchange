@@ -14,13 +14,15 @@ namespace UI
         {
             
             TransferService service = new TransferService();
-
+            
             Cliente cliente = new Cliente("20354746418", "David");
             CajaAhorro cajaAhorro = new CajaAhorro("1111111111111111111111");
-            cajaAhorro.Depositar(1000000);
+            service.RegistrarCuenta(cajaAhorro);
+            cajaAhorro.Depositar(100000);
             cliente.AgregarCuenta(cajaAhorro);
 
             MonederoBTC mon = new MonederoBTC("YYYY-YYYY");
+            service.RegistrarCuenta(mon);
             cliente.AgregarCuenta(mon);
 
             // TRANSFERENCIA DE CA A BTC
@@ -50,6 +52,7 @@ namespace UI
             // CREACION DE CLIENTE Y CUENTA
             Cliente cliente2 = new Cliente("20392120187", "María");
             CajaAhorro cajaAhorro2 = new CajaAhorro("2222222222222222222222");
+            service.RegistrarCuenta(cajaAhorro2);
             cliente2.AgregarCuenta(cajaAhorro2);
 
             // TRANSFERENCIA DE CA A CA
@@ -68,9 +71,11 @@ namespace UI
 
 
             // CREACION DE CLIENTE Y CUENTA
-            Cliente cliente3 = new Cliente("402003007", "Lucas");
+            Cliente cliente3 = new Cliente("20118490128", "Lucas");
             MonederoBTC mon3 = new MonederoBTC("ZZZZ-ZZZZ");
             MonederoBTC mon4 = new MonederoBTC("RRRR-RRRR");
+            service.RegistrarCuenta(mon3);
+            service.RegistrarCuenta(mon4);
             mon3.Depositar(1);
             mon4.Depositar(0);
             cliente3.AgregarCuenta(mon3);
@@ -89,6 +94,23 @@ namespace UI
             Console.WriteLine("Despues de transferir BTC a BTC");
             Console.WriteLine($"Monedero BTC 1: {mon3.Saldo}");
             Console.WriteLine($"Monedero BTC 2: {mon4.Saldo} \n");
+
+            // IMPRIMIR LISTA DE CUENTAS
+            Console.WriteLine("Lista de Cuentas");
+            foreach (var cuenta in service.ObtenerCuentas())
+            {
+                Console.WriteLine($"Cliente: {cuenta.Cliente.Nombre}, Tipo de Cuenta: {cuenta.GetType().Name}, Saldo: {cuenta.Saldo}");
+            }
+
+            // IMPRIMIR LISTA DE OPERACIONES
+            Console.WriteLine("Lista de Operaciones");
+            foreach (var operacion in service.ObtenerOperaciones())
+            {
+                Console.WriteLine($"Tipo de Operación: {operacion.TipoOperacion}, Fecha: {operacion.Fecha}, Monto: {operacion.Monto}");
+            }
+
+            Console.WriteLine("Presione cualquier tecla para salir...");
+
 
         }
     }

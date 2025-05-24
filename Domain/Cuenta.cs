@@ -27,6 +27,10 @@ namespace Domain
                 throw new InvalidOperationException("Saldo insuficiente.");
             Saldo -= monto;
         }
+        public void ActualizarSaldo(decimal nuevoSaldo)
+        {
+            Saldo = nuevoSaldo;
+        }
 
 
         //public abstract void Accept(ICuentaVisitor visitor);
